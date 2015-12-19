@@ -1,20 +1,24 @@
 /*
-This file is part of Jedi Academy.
+===========================================================================
+Copyright (C) 2000 - 2013, Raven Software, Inc.
+Copyright (C) 2001 - 2013, Activision, Inc.
+Copyright (C) 2013 - 2015, OpenJK contributors
 
-    Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+This file is part of the OpenJK source code.
 
-    Jedi Academy is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
 
-    You should have received a copy of the GNU General Public License
-    along with Jedi Academy.  If not, see <http://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
 */
-// Copyright 2001-2013 Raven Software
 
 #ifndef __G_SHARED_H__
 #define __G_SHARED_H__
@@ -118,7 +122,7 @@ typedef struct {
 
 
 //==================================================================
-typedef enum 
+typedef enum
 {
 	MOVER_POS1,
 	MOVER_POS2,
@@ -129,7 +133,7 @@ typedef enum
 // Rendering information structure
 
 
-typedef enum 
+typedef enum
 {
 	MODEL_LEGS = 0,
 	MODEL_TORSO,
@@ -353,7 +357,7 @@ typedef struct {
 // on each level change or team change at ClientBegin()
 // !!!!!!!!!! LOADSAVE-affecting structure !!!!!!!!!!
 typedef struct {
-	clientConnected_t	connected;	
+	clientConnected_t	connected;
 	usercmd_t	lastCommand;
 	char		netname[34];
 	int			maxHealth;			// for handicapping
@@ -434,7 +438,7 @@ struct gclient_s {
 	// timeResidual is used to handle events that happen every second
 	// like health / armor countdowns and regeneration
 	int			timeResidual;
-	
+
 	// Facial Expression Timers
 
 	float		facial_blink;		// time before next blink. If a minus value, we are in blink mode
@@ -504,7 +508,7 @@ struct gclient_s {
 #define	MAX_PARMS	16
 #define	MAX_PARM_STRING_LENGTH	MAX_QPATH//was 16, had to lengthen it so they could take a valid file path
 typedef struct
-{	
+{
 	char	parm[MAX_PARMS][MAX_PARM_STRING_LENGTH];
 } parms_t;
 
@@ -555,7 +559,7 @@ struct gentity_s {
 Ghoul2 Insert Start
 */
 	// this marker thing of Jake's is used for memcpy() length calcs, so don't put any ordinary fields (like above)
-	//	below this point or they won't work, and will mess up all sorts of stuff. 
+	//	below this point or they won't work, and will mess up all sorts of stuff.
 	//
 	CGhoul2Info_v	ghoul2;
 
@@ -582,7 +586,7 @@ Ghoul2 Insert End
 	char		*model2;			// Torso model
 
 	int			freetime;			// sv.time when the object was freed
-	
+
 	int			eventTime;			// events will be cleared EVENT_VALID_MSEC after set
 	qboolean	freeAfterEvent;
 //	qboolean	unlinkAfterEvent;
@@ -626,7 +630,7 @@ Ghoul2 Insert End
 
 	int		roff_ctr;		// current roff frame we are playing
 
-	int			next_roff_time;	
+	int			next_roff_time;
 	int			fx_time;		// timer for beam in/out effects.
 
 //Think Functions
@@ -765,7 +769,7 @@ Ghoul2 Insert End
 	qhandle_t		cinematicModel;
 
 //==========================================================================================
-	
+
 //FIELDS USED EXCLUSIVELY BY SPECIFIC CLASSES OF ENTITIES
 	// Vehicle information.
 	// The vehicle object.
@@ -805,7 +809,7 @@ Ghoul2 Insert End
 
 //Variables used only by waypoints (for the most part)
 	float		radius;
-	
+
 	union
 	{
 		int		wpIndex;
@@ -824,7 +828,7 @@ Ghoul2 Insert End
 	};
 
 //FIXME: Are these being used anymore?
-	gitem_t		*item;			// for bonus items - 
+	gitem_t		*item;			// for bonus items -
 	char		*message;		//Used by triggers to print a message when activated
 
 	float		lightLevel;

@@ -1,3 +1,23 @@
+/*
+===========================================================================
+Copyright (C) 2013 - 2015, OpenJK contributors
+
+This file is part of the OpenJK source code.
+
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
+*/
+
 // cl_cgameapi.cpp  -- client system interaction with client game
 #include "qcommon/cm_public.h"
 #include "qcommon/RoffSystem.h"
@@ -195,7 +215,7 @@ qboolean CGVM_NoUseableForce( void ) {
 
 void CGVM_GetOrigin( int entID, vec3_t out ) {
 	if ( cgvm->isLegacy ) {
-		VM_Call( cgvm, CG_GET_ORIGIN, entID, out );
+		VM_Call( cgvm, CG_GET_ORIGIN, entID, reinterpret_cast< intptr_t >( out ) );
 		return;
 	}
 	VMSwap v( cgvm );
@@ -205,7 +225,7 @@ void CGVM_GetOrigin( int entID, vec3_t out ) {
 
 void CGVM_GetAngles( int entID, vec3_t out ) {
 	if ( cgvm->isLegacy ) {
-		VM_Call( cgvm, CG_GET_ANGLES, entID, out );
+		VM_Call( cgvm, CG_GET_ANGLES, entID, reinterpret_cast< intptr_t >( out ) );
 		return;
 	}
 	VMSwap v( cgvm );
@@ -233,7 +253,7 @@ trajectory_t *CGVM_GetAngleTrajectory( int entID ) {
 
 void CGVM_ROFF_NotetrackCallback( int entID, const char *notetrack ) {
 	if ( cgvm->isLegacy ) {
-		VM_Call( cgvm, CG_ROFF_NOTETRACK_CALLBACK, entID, notetrack );
+		VM_Call( cgvm, CG_ROFF_NOTETRACK_CALLBACK, entID, reinterpret_cast< intptr_t >( notetrack ) );
 		return;
 	}
 	VMSwap v( cgvm );
@@ -1627,7 +1647,7 @@ void CL_BindCGame( void ) {
 	static cgameImport_t cgi;
 	cgameExport_t		*ret;
 	GetCGameAPI_t		GetCGameAPI;
-	char				dllName[MAX_OSPATH] = "cgame"ARCH_STRING DLL_EXT;
+	char				dllName[MAX_OSPATH] = "cgame" ARCH_STRING DLL_EXT;
 
 	memset( &cgi, 0, sizeof( cgi ) );
 
@@ -1837,6 +1857,8 @@ void CL_BindCGame( void ) {
 		cgi.G2API_CleanEntAttachments			= CL_G2API_CleanEntAttachments;
 		cgi.G2API_OverrideServer				= CL_G2API_OverrideServer;
 		cgi.G2API_GetSurfaceName				= CL_G2API_GetSurfaceName;
+
+		cgi.ext.R_Font_StrLenPixels				= re->ext.Font_StrLenPixels;
 
 		GetCGameAPI = (GetCGameAPI_t)cgvm->GetModuleAPI;
 		ret = GetCGameAPI( CGAME_API_VERSION, &cgi );

@@ -1,20 +1,24 @@
 /*
-This file is part of Jedi Academy.
+===========================================================================
+Copyright (C) 2000 - 2013, Raven Software, Inc.
+Copyright (C) 2001 - 2013, Activision, Inc.
+Copyright (C) 2013 - 2015, OpenJK contributors
 
-    Jedi Academy is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+This file is part of the OpenJK source code.
 
-    Jedi Academy is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
 
-    You should have received a copy of the GNU General Public License
-    along with Jedi Academy.  If not, see <http://www.gnu.org/licenses/>.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
 */
-// Copyright 2001-2013 Raven Software
 
 //wp_saberLoad.cpp
 
@@ -31,7 +35,7 @@ extern qboolean PM_SaberInAttack( int move );
 
 extern stringID_table_t FPTable[];
 
-#define MAX_SABER_DATA_SIZE 0x80000
+#define MAX_SABER_DATA_SIZE (1024*1024) // 1mb, was 512kb
 char	SaberParms[MAX_SABER_DATA_SIZE];
 
 void Saber_SithSwordPrecache( void )
@@ -141,99 +145,68 @@ stringID_table_t SaberMoveTable[] =
 };
 
 
-saber_styles_t TranslateSaberStyle( const char *name ) 
-{
-	if ( !Q_stricmp( name, "fast" ) ) 
-	{
-		return SS_FAST;
-	}
-	if ( !Q_stricmp( name, "medium" ) ) 
-	{
-		return SS_MEDIUM;
-	}
-	if ( !Q_stricmp( name, "strong" ) ) 
-	{
-		return SS_STRONG;
-	}
-	if ( !Q_stricmp( name, "desann" ) ) 
-	{
-		return SS_DESANN;
-	}
-	if ( !Q_stricmp( name, "tavion" ) ) 
-	{
-		return SS_TAVION;
-	}
-	if ( !Q_stricmp( name, "dual" ) ) 
-	{
-		return SS_DUAL;
-	}
-	if ( !Q_stricmp( name, "staff" ) ) 
-	{
-		return SS_STAFF;
-	}
+saber_styles_t TranslateSaberStyle( const char *name ) {
+	if ( !Q_stricmp( name, "fast" ) )		return SS_FAST;
+	if ( !Q_stricmp( name, "medium" ) ) 	return SS_MEDIUM;
+	if ( !Q_stricmp( name, "strong" ) ) 	return SS_STRONG;
+	if ( !Q_stricmp( name, "desann" ) ) 	return SS_DESANN;
+	if ( !Q_stricmp( name, "tavion" ) ) 	return SS_TAVION;
+	if ( !Q_stricmp( name, "dual" ) )		return SS_DUAL;
+	if ( !Q_stricmp( name, "staff" ) )		return SS_STAFF;
+
 	return SS_NONE;
 }
 
-void WP_SaberFreeStrings( saberInfo_t &saber )
-{
-	if (saber.name && gi.bIsFromZone(saber.name , TAG_G_ALLOC)) {
-		gi.Free (saber.name);
-		saber.name=0;
+void WP_SaberFreeStrings( saberInfo_t &saber ) {
+	if ( saber.name && gi.bIsFromZone( saber.name, TAG_G_ALLOC ) ) {
+		gi.Free( saber.name );
+		saber.name = NULL;
 	}
-	if (saber.fullName && gi.bIsFromZone(saber.fullName , TAG_G_ALLOC)) {
-		gi.Free (saber.fullName);
-		saber.fullName=0;
+	if ( saber.fullName && gi.bIsFromZone( saber.fullName, TAG_G_ALLOC ) ) {
+		gi.Free( saber.fullName );
+		saber.fullName = NULL;
 	}
-	if (saber.model && gi.bIsFromZone(saber.model , TAG_G_ALLOC)) {
-		gi.Free (saber.model);
-		saber.model=0;
+	if ( saber.model && gi.bIsFromZone( saber.model, TAG_G_ALLOC ) ) {
+		gi.Free( saber.model );
+		saber.model = NULL;
 	}
-	if (saber.skin && gi.bIsFromZone(saber.skin , TAG_G_ALLOC)) {
-		gi.Free (saber.skin);
-		saber.skin=0;
+	if ( saber.skin && gi.bIsFromZone( saber.skin, TAG_G_ALLOC ) ) {
+		gi.Free( saber.skin );
+		saber.skin = NULL;
 	}
-	if (saber.brokenSaber1 && gi.bIsFromZone(saber.brokenSaber1 , TAG_G_ALLOC)) {
-		gi.Free (saber.brokenSaber1);
-		saber.brokenSaber1=0;
+	if ( saber.brokenSaber1 && gi.bIsFromZone( saber.brokenSaber1, TAG_G_ALLOC ) ) {
+		gi.Free( saber.brokenSaber1 );
+		saber.brokenSaber1 = NULL;
 	}
-	if (saber.brokenSaber2 && gi.bIsFromZone(saber.brokenSaber2 , TAG_G_ALLOC)) {
-		gi.Free (saber.brokenSaber2);
-		saber.brokenSaber2=0;
+	if ( saber.brokenSaber2 && gi.bIsFromZone( saber.brokenSaber2, TAG_G_ALLOC ) ) {
+		gi.Free( saber.brokenSaber2 );
+		saber.brokenSaber2 = NULL;
 	}
 }
 
-qboolean WP_SaberBladeUseSecondBladeStyle( saberInfo_t *saber, int bladeNum )
-{
-	if ( saber )
-	{
-		if ( saber->bladeStyle2Start > 0 )
-		{
-			if ( bladeNum >= saber->bladeStyle2Start )
-			{
-				return qtrue;
-			}
-		}
-	}
+qboolean WP_SaberBladeUseSecondBladeStyle( saberInfo_t *saber, int bladeNum ) {
+	if ( saber
+		&& saber->bladeStyle2Start > 0
+		&& bladeNum >= saber->bladeStyle2Start )
+		return qtrue;
+
 	return qfalse;
 }
 
-qboolean WP_SaberBladeDoTransitionDamage( saberInfo_t *saber, int bladeNum )
-{
-	if ( !WP_SaberBladeUseSecondBladeStyle( saber, bladeNum )
-		&& (saber->saberFlags2&SFL2_TRANSITION_DAMAGE) )
-	{//use first blade style for this blade
+qboolean WP_SaberBladeDoTransitionDamage( saberInfo_t *saber, int bladeNum ) {
+	//use first blade style for this blade
+	if ( !WP_SaberBladeUseSecondBladeStyle( saber, bladeNum ) && (saber->saberFlags2 & SFL2_TRANSITION_DAMAGE) )
 		return qtrue;
-	}
-	else if ( WP_SaberBladeUseSecondBladeStyle( saber, bladeNum )
-		&& (saber->saberFlags2&SFL2_TRANSITION_DAMAGE2) )
-	{//use second blade style for this blade
+
+	//use second blade style for this blade
+	else if ( WP_SaberBladeUseSecondBladeStyle( saber, bladeNum ) && (saber->saberFlags2 & SFL2_TRANSITION_DAMAGE2) )
 		return qtrue;
-	}
+
 	return qfalse;
 }
 
 qboolean WP_UseFirstValidSaberStyle( gentity_t *ent, int *saberAnimLevel )
-{ 
+{
 	if ( ent && ent->client )
 	{
 		qboolean styleInvalid = qfalse;
@@ -426,10 +399,10 @@ void WP_SaberSetDefaults( saberInfo_t *saber, qboolean setColors = qtrue )
 	saber->moveSpeedScale = 1.0f;				//1.0 - you move faster/slower when using this saber
 	saber->animSpeedScale = 1.0f;				//1.0 - plays normal attack animations faster/slower
 
-	saber->kataMove = LS_INVALID;				//LS_INVALID - if set, player will execute this move when they press both attack buttons at the same time 
-	saber->lungeAtkMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they crouch+fwd+attack 
-	saber->jumpAtkUpMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they jump+attack 
-	saber->jumpAtkFwdMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they jump+fwd+attack 
+	saber->kataMove = LS_INVALID;				//LS_INVALID - if set, player will execute this move when they press both attack buttons at the same time
+	saber->lungeAtkMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they crouch+fwd+attack
+	saber->jumpAtkUpMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they jump+attack
+	saber->jumpAtkFwdMove = LS_INVALID;			//LS_INVALID - if set, player will execute this move when they jump+fwd+attack
 	saber->jumpAtkBackMove = LS_INVALID;		//LS_INVALID - if set, player will execute this move when they jump+back+attack
 	saber->jumpAtkRightMove = LS_INVALID;		//LS_INVALID - if set, player will execute this move when they jump+rightattack
 	saber->jumpAtkLeftMove = LS_INVALID;		//LS_INVALID - if set, player will execute this move when they jump+left+attack
@@ -446,7 +419,7 @@ void WP_SaberSetDefaults( saberInfo_t *saber, qboolean setColors = qtrue )
 	saber->bladeStyle2Start = 0;			//0 - if set, blades from this number and higher use the following values (otherwise, they use the normal values already set)
 
 	//***The following can be different for the extra blades - not setting them individually defaults them to the value for the whole saber (and first blade)***
-	
+
 	//===PRIMARY BLADES=====================
 	//done in cgame (client-side code)
 	saber->trailStyle = 0;					//0 - default (0) is normal, 1 is a motion blur and 2 is no trail at all (good for real-sword type mods)
@@ -474,7 +447,7 @@ void WP_SaberSetDefaults( saberInfo_t *saber, qboolean setColors = qtrue )
 	saber->splashRadius = 0.0f;				//0 - radius of splashDamage
 	saber->splashDamage = 0;				//0 - amount of splashDamage, 100% at a distance of 0, 0% at a distance = splashRadius
 	saber->splashKnockback = 0.0f;			//0 - amount of splashKnockback, 100% at a distance of 0, 0% at a distance = splashRadius
-	
+
 	//===SECONDARY BLADES===================
 	//done in cgame (client-side code)
 	saber->trailStyle2 = 0;					//0 - default (0) is normal, 1 is a motion blur and 2 is no trail at all (good for real-sword type mods)
@@ -2013,7 +1986,7 @@ static void WP_SaberSetupKeywordHash( void ) {
 	hashSetup = qtrue;
 }
 
-qboolean WP_SaberParseParms( const char *SaberName, saberInfo_t *saber, qboolean setColors ) 
+qboolean WP_SaberParseParms( const char *SaberName, saberInfo_t *saber, qboolean setColors )
 {
 	const char	*token;
 	const char	*p;
@@ -2025,12 +1998,15 @@ qboolean WP_SaberParseParms( const char *SaberName, saberInfo_t *saber, qboolean
 
 	if ( !saber )
 		return qfalse;
-	
+
 	//Set defaults so that, if it fails, there's at least something there
 	WP_SaberSetDefaults( saber, setColors );
 
-	if ( !VALIDSTRING( SaberName ) ) 
+	if ( !VALIDSTRING( SaberName ) )
 		return qfalse;
+
+	//check if we want to set the sabercolors or not (for if we're loading a savegame)
+	Saber_SetColor = setColors;
 
 	//try to parse it out
 	p = SaberParms;
@@ -2114,7 +2090,7 @@ void WP_RemoveSaber( gentity_t *ent, int saberNum )
 				ent->client->ps.saberAnimLevel = i;
 				if ( ent->s.number < MAX_CLIENTS )
 				{
-					cg.saberAnimLevelPending = ent->client->ps.saberAnimLevel; 
+					cg.saberAnimLevelPending = ent->client->ps.saberAnimLevel;
 				}
 				break;
 			}
@@ -2182,7 +2158,7 @@ void WP_SetSaber( gentity_t *ent, int saberNum, const char *saberName )
 	WP_UseFirstValidSaberStyle( ent, &ent->client->ps.saberAnimLevel );
 	if ( ent->s.number < MAX_CLIENTS )
 	{
-		cg.saberAnimLevelPending = ent->client->ps.saberAnimLevel; 
+		cg.saberAnimLevelPending = ent->client->ps.saberAnimLevel;
 	}
 }
 
@@ -2227,7 +2203,7 @@ qboolean WP_BreakSaber( gentity_t *ent, const char *surfName, saberType_t saberT
 		return qfalse;
 	}
 
-	if ( !ent->client->ps.saber[0].brokenSaber1 ) 
+	if ( !ent->client->ps.saber[0].brokenSaber1 )
 	{//not breakable into another type of saber
 		return qfalse;
 	}
@@ -2239,7 +2215,7 @@ qboolean WP_BreakSaber( gentity_t *ent, const char *surfName, saberType_t saberT
 		return qfalse;
 	}
 
-	if ( Q_stricmpn( "w_", surfName, 2 ) 
+	if ( Q_stricmpn( "w_", surfName, 2 )
 		&& Q_stricmpn( "saber", surfName, 5 ) //hack because using mod-community made saber
 		&& Q_stricmp( "cylinder01", surfName ) )//hack because using mod-community made saber
 	{//didn't hit my weapon
@@ -2282,7 +2258,7 @@ qboolean WP_BreakSaber( gentity_t *ent, const char *surfName, saberType_t saberT
 		WP_SetSaberEntModelSkin( ent, &g_entities[ent->client->ps.saberEntityNum] );
 	}
 
-	if ( originalNumBlades <= 1 ) 
+	if ( originalNumBlades <= 1 )
 	{//nothing to split off
 		//FIXME: handle this?
 	}
@@ -2306,7 +2282,7 @@ qboolean WP_BreakSaber( gentity_t *ent, const char *surfName, saberType_t saberT
 	return broken;
 }
 
-void WP_SaberLoadParms( void ) 
+void WP_SaberLoadParms( void )
 {
 	int			len, totallen, saberExtFNLen, fileCnt, i;
 	char		*buffer, *holdChar, *marker;
@@ -2323,13 +2299,13 @@ void WP_SaberLoadParms( void )
 	fileCnt = gi.FS_GetFileList("ext_data/sabers", ".sab", saberExtensionListBuf, sizeof(saberExtensionListBuf) );
 
 	holdChar = saberExtensionListBuf;
-	for ( i = 0; i < fileCnt; i++, holdChar += saberExtFNLen + 1 ) 
+	for ( i = 0; i < fileCnt; i++, holdChar += saberExtFNLen + 1 )
 	{
 		saberExtFNLen = strlen( holdChar );
 
 		len = gi.FS_ReadFile( va( "ext_data/sabers/%s", holdChar), (void **) &buffer );
 
-		if ( len == -1 ) 
+		if ( len == -1 )
 		{
 			gi.Printf( "WP_SaberLoadParms: error reading %s\n", holdChar );
 		}
@@ -2339,7 +2315,7 @@ void WP_SaberLoadParms( void )
 			{//don't let it end on a } because that should be a stand-alone token
 				strcat( marker, " " );
 				totallen++;
-				marker++; 
+				marker++;
 			}
 			len = COM_Compress( buffer );
 

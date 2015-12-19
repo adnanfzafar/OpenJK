@@ -1,3 +1,26 @@
+/*
+===========================================================================
+Copyright (C) 2000 - 2013, Raven Software, Inc.
+Copyright (C) 2001 - 2013, Activision, Inc.
+Copyright (C) 2005 - 2015, ioquake3 contributors
+Copyright (C) 2013 - 2015, OpenJK contributors
+
+This file is part of the OpenJK source code.
+
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
+*/
+
 #pragma once
 
 #include "../rd-common/tr_public.h"
@@ -45,6 +68,10 @@ void LoadJPG( const char *filename, byte **pic, int *width, int *height );
 // Load raw image data from PNG image.
 void LoadPNG( const char *filename, byte **data, int *width, int *height );
 
+#ifdef JK2_MODE
+//Load raw image data from JPEG input.
+void LoadJPGFromBuffer( byte *inputBuffer, size_t len, byte **pic, int *width, int *height );
+#endif
 
 /*
 ================================================================================
@@ -60,3 +87,8 @@ void RE_SaveJPG( const char * filename, int quality, int image_width, int image_
 // Save raw image data as PNG image file.
 int RE_SavePNG( const char *filename, byte *buf, size_t width, size_t height, int byteDepth );
 
+void *R_Malloc( int iSize, memtag_t eTag, qboolean bZeroit=qfalse );
+void R_Free( void *ptr );
+int R_MemSize( memtag_t eTag );
+void R_MorphMallocTag( void *pvBuffer, memtag_t eDesiredTag );
+void *R_Hunk_Alloc( int iSize, qboolean bZeroit=qtrue );

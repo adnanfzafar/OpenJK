@@ -1,4 +1,26 @@
-//bg_saberLoad.c
+/*
+===========================================================================
+Copyright (C) 2000 - 2013, Raven Software, Inc.
+Copyright (C) 2001 - 2013, Activision, Inc.
+Copyright (C) 2013 - 2015, OpenJK contributors
+
+This file is part of the OpenJK source code.
+
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
+*/
+
+// bg_saberLoad.c
 // game and cgame, NOT ui
 
 #include "qcommon/q_shared.h"
@@ -10,7 +32,7 @@
 	#include "g_local.h"
 #elif _CGAME
 	#include "cgame/cg_local.h"
-#elif _UI
+#elif UI_BUILD
 	#include "ui/ui_local.h"
 #endif
 
@@ -19,7 +41,7 @@ extern stringID_table_t animTable[MAX_ANIMATIONS+1];
 int BG_SoundIndex( const char *sound ) {
 #ifdef _GAME
 	return G_SoundIndex( sound );
-#elif defined(_CGAME) || defined(_UI)
+#elif defined(_CGAME) || defined(UI_BUILD)
 	return trap->S_RegisterSound( sound );
 #endif
 }
@@ -2265,7 +2287,7 @@ void WP_SaberLoadParms( void )
 		}
 
 		if ( (totallen + len+1) >= MAX_SABER_DATA_SIZE ) {
-#ifdef _UI
+#ifdef UI_BUILD
 			Com_Error( ERR_FATAL, "WP_SaberLoadParms: Saber extensions (*.sab) are too large!\nRan out of space before reading %s", holdChar );
 #else
 			Com_Error( ERR_DROP, "WP_SaberLoadParms: Saber extensions (*.sab) are too large!\nRan out of space before reading %s", holdChar );
@@ -2290,7 +2312,7 @@ void WP_SaberLoadParms( void )
 	}
 }
 
-#ifdef _UI
+#ifdef UI_BUILD
 qboolean WP_IsSaberTwoHanded( const char *saberName )
 {
 	int twoHanded;

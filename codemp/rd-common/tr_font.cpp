@@ -1,3 +1,25 @@
+/*
+===========================================================================
+Copyright (C) 2000 - 2013, Raven Software, Inc.
+Copyright (C) 2001 - 2013, Activision, Inc.
+Copyright (C) 2013 - 2015, OpenJK contributors
+
+This file is part of the OpenJK source code.
+
+OpenJK is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+===========================================================================
+*/
+
 #include "qcommon/sstring.h"	// stl string class won't compile in here (MS shite), so use Gil's.
 #include "tr_local.h"
 #include "tr_font.h"
@@ -73,8 +95,8 @@ SBCSOverrideLanguages_t g_SBCSOverrideLanguages[]=
 
 struct ThaiCodes_t
 {
-	map <int, int>	m_mapValidCodes;
-	vector<int>		m_viGlyphWidths;
+	std::map <int, int>	m_mapValidCodes;
+	std::vector<int>		m_viGlyphWidths;
 	sstring_t		m_strInitFailureReason;	// so we don't have to keep retrying to work this out
 
 	void Clear( void )
@@ -93,7 +115,7 @@ struct ThaiCodes_t
 	//
 	int GetValidIndex( int iCode )
 	{
-		map <int,int>::iterator it = m_mapValidCodes.find( iCode );
+		std::map <int,int>::iterator it = m_mapValidCodes.find( iCode );
 		if (it != m_mapValidCodes.end())
 		{
             return (*it).second;
@@ -240,8 +262,8 @@ float RoundTenth( float fValue )
 
 
 int							g_iCurrentFontIndex;	// entry 0 is reserved index for missing/invalid, else ++ with each new font registered
-vector<CFontInfo *>			g_vFontArray;
-typedef map<sstring_t, int>	FontIndexMap_t;
+std::vector<CFontInfo *>			g_vFontArray;
+typedef std::map<sstring_t, int>	FontIndexMap_t;
 							FontIndexMap_t g_mapFontIndexes;
 int g_iNonScaledCharRange;	// this is used with auto-scaling of asian fonts, anything below this number is preserved in scale, anything above is scaled down by 0.75f
 
@@ -1333,17 +1355,10 @@ CFontInfo *GetFont(int index)
 	return pFont;
 }
 
-
-int RE_Font_StrLenPixels(const char *psText, const int iFontHandle, const float fScale)
-{
-	float		fMaxWidth = 0.0f;
-	float		fThisWidth = 0.0f;
-	CFontInfo	*curfont;
-
-	curfont = GetFont(iFontHandle);
-	if(!curfont)
-	{
-		return(0);
+float RE_Font_StrLenPixelsNew( const char *psText, const int iFontHandle, const float fScale ) {
+	CFontInfo *curfont = GetFont(iFontHandle);
+	if ( !curfont ) {
+		return 0.0f;
 	}
 
 	float fScaleAsian = fScale;
@@ -1352,42 +1367,52 @@ int RE_Font_StrLenPixels(const char *psText, const int iFontHandle, const float 
 		fScaleAsian = fScale * 0.75f;
 	}
 
-	while(*psText)
-	{
+	float maxLineWidth = 0.0f;
+	float thisLineWidth = 0.0f;
+	while ( *psText ) {
 		int iAdvanceCount;
 		unsigned int uiLetter = AnyLanguage_ReadCharFromString( psText, &iAdvanceCount, NULL );
 		psText += iAdvanceCount;
 
-		if (uiLetter == '^' )
-		{
-			if (*psText >= '0' &&
-				*psText <= '9')
-			{
+		if ( uiLetter == '^' ) {
+			if ( *psText >= '0' && *psText <= '9' ) {
 				uiLetter = AnyLanguage_ReadCharFromString( psText, &iAdvanceCount, NULL );
 				psText += iAdvanceCount;
 				continue;
 			}
 		}
 
-		if (uiLetter == 0x0A)
-		{
-			fThisWidth = 0.0f;
+		if ( uiLetter == '\n' ) {
+			thisLineWidth = 0.0f;
 		}
-		else
-		{
-			int iPixelAdvance = curfont->GetLetterHorizAdvance( uiLetter );
+		else {
+			float iPixelAdvance = (float)curfont->GetLetterHorizAdvance( uiLetter );
 
 			float fValue = iPixelAdvance * ((uiLetter > (unsigned)g_iNonScaledCharRange) ? fScaleAsian : fScale);
-			fThisWidth += curfont->mbRoundCalcs ? Round( fValue ) : fValue;
-			if (fThisWidth > fMaxWidth)
-			{
-				fMaxWidth = fThisWidth;
+
+			if ( r_aspectCorrectFonts->integer == 1 ) {
+				fValue *= ((float)(SCREEN_WIDTH * glConfig.vidHeight) / (float)(SCREEN_HEIGHT * glConfig.vidWidth));
+			}
+			else if ( r_aspectCorrectFonts->integer == 2 ) {
+				fValue = ceilf(
+					fValue * ((float)(SCREEN_WIDTH * glConfig.vidHeight) / (float)(SCREEN_HEIGHT * glConfig.vidWidth))
+				);
+			}
+			thisLineWidth += curfont->mbRoundCalcs
+				? roundf( fValue )
+				: (r_aspectCorrectFonts->integer == 2)
+					? ceilf( fValue )
+					: fValue;
+			if ( thisLineWidth > maxLineWidth ) {
+				maxLineWidth = thisLineWidth;
 			}
 		}
 	}
+	return maxLineWidth;
+}
 
-	// using ceil because we need to make sure that all the text is contained within the integer pixel width we're returning
-	return (int)ceilf(fMaxWidth);
+int RE_Font_StrLenPixels( const char *psText, const int iFontHandle, const float fScale ) {
+	return (int)ceilf( RE_Font_StrLenPixelsNew( psText, iFontHandle, fScale ) );
 }
 
 // not really a font function, but keeps naming consistant...
@@ -1584,7 +1609,7 @@ void RE_Font_DrawString(int ox, int oy, const char *psText, const float *rgba, c
 					{
 						vec4_t color;
 						Com_Memcpy( color, g_color_table[colour], sizeof( color ) );
-						color[3] = rgba[3];
+						color[3] = rgba ? rgba[3] : 1.0f;
 						RE_SetColor( color );
 					}
 					break;
@@ -1630,13 +1655,22 @@ void RE_Font_DrawString(int ox, int oy, const char *psText, const float *rgba, c
 								//lastcolour.c,
 								hShader							// qhandle_t hShader
 								);
-
-				fx += fAdvancePixels;
+				if ( r_aspectCorrectFonts->integer == 1 ) {
+					fx += fAdvancePixels
+						* ((float)(SCREEN_WIDTH * glConfig.vidHeight) / (float)(SCREEN_HEIGHT * glConfig.vidWidth));
+				}
+				else if ( r_aspectCorrectFonts->integer == 2 ) {
+					fx += ceilf( fAdvancePixels
+						* ((float)(SCREEN_WIDTH * glConfig.vidHeight) / (float)(SCREEN_HEIGHT * glConfig.vidWidth)) );
+				}
+				else {
+					fx += fAdvancePixels;
+				}
 			}
 			break;
 		}
 	}
-	//let it remember the old color //RE_SetColor(NULL);;
+	//let it remember the old color //RE_SetColor(NULL);
 }
 
 int RE_RegisterFont(const char *psName)
@@ -1714,7 +1748,7 @@ void R_ReloadFonts_f(void)
 {
 	// first, grab all the currently-registered fonts IN THE ORDER THEY WERE REGISTERED...
 	//
-	vector <sstring_t> vstrFonts;
+	std::vector <sstring_t> vstrFonts;
 
 	int iFontToFind;
 	for (iFontToFind = 1; iFontToFind < g_iCurrentFontIndex; iFontToFind++)
